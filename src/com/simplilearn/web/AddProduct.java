@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,13 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.simplilearn.dao.ProductDAO;
 import com.simplilearn.util.InItConn;
 
-@WebServlet("/init-connection")
-public class InItDB extends HttpServlet {
+@WebServlet("/add-product")
+public class AddProduct extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	public InItDB() {
+	public AddProduct() {
 		super();
 	}
 
@@ -27,22 +29,28 @@ public class InItDB extends HttpServlet {
 		PrintWriter out = response.getWriter();
 		// add nav bar
 		request.getRequestDispatcher("index.html").include(request, response);
-		
-		// create db connection
-		try {
-			InItConn conn = new InItConn();
-			if (conn.getConnection() != null) {
-				out.print("<h3 style='color:green'> Your DB connection successfully initiated !<h3>");
-			}
-
-		} catch (Exception e) {
-			out.print("<h3 style='color:red'> Sorry, DB connection failed ! <h3>");
-		}
+		// load add product
+		request.getRequestDispatcher("add-product.html").include(request, response);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
+		response.setContentType("text/html");
+		PrintWriter out = response.getWriter();
+		
+		//fetch request params
+		String productName = request.getParameter("name");
+		String productPrice = request.getParameter("price");
+		
+		//create product
+		try {
+			ProductDAO.addPorduct("ecom_products", productName, productPrice);
+			// add nav bar
+			request.getRequestDispatcher("index.html").include(request, response);
+			out.print("<h3 style='color:green'> Product data inserted sucessfully <h3>");
+		} catch (SQLException e) {
+			out.print("<h3 style='color:red'> Sorry, Product data insertion failed ! <h3>");
+		}
 	}
 
 }

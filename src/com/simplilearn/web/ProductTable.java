@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,13 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.simplilearn.dao.ProductDAO;
 import com.simplilearn.util.InItConn;
 
-@WebServlet("/init-connection")
-public class InItDB extends HttpServlet {
+@WebServlet("/create-product-table")
+public class ProductTable extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	public InItDB() {
+	public ProductTable() {
 		super();
 	}
 
@@ -28,15 +30,12 @@ public class InItDB extends HttpServlet {
 		// add nav bar
 		request.getRequestDispatcher("index.html").include(request, response);
 		
-		// create db connection
+		// create table
 		try {
-			InItConn conn = new InItConn();
-			if (conn.getConnection() != null) {
-				out.print("<h3 style='color:green'> Your DB connection successfully initiated !<h3>");
-			}
-
-		} catch (Exception e) {
-			out.print("<h3 style='color:red'> Sorry, DB connection failed ! <h3>");
+			ProductDAO.createTable("ecom_products");
+			out.print("<h3 style='color:green'> Product table is created sucessfully <h3>");
+		} catch (SQLException e) {
+			out.print("<h3 style='color:red'> Sorry, Product table creation failed ! <h3>");
 		}
 	}
 
