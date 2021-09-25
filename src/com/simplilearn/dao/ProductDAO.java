@@ -1,9 +1,13 @@
 package com.simplilearn.dao;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.simplilearn.util.InItConn;
 
@@ -56,19 +60,27 @@ public class ProductDAO {
 	}
 
 	// update product
-	public static void updatePorduct(String tableName, String productId, String productName, String productPrice)
+	public static int updatePorduct(String tableName, String productId, String productName, String productPrice)
 			throws SQLException {
 		// get db connection
 		Connection conn = new InItConn().getConnection();
 
-		String query = "update " + tableName + " set name='" + productName + "',price=" + productPrice + " where id="
-				+ productId;
-		// create statement
-		Statement stm = conn.createStatement();
+		String updateQuery = "update " + tableName + " set name=?, price=? where id= ?";
+
+		// create prepared statement
+		PreparedStatement pstm = conn.prepareStatement(updateQuery);
+
+		// set parameters
+		pstm.setString(1, productName);
+		pstm.setDouble(2, Double.parseDouble(productPrice));
+		pstm.setInt(3, Integer.parseInt(productId));
+
 		// execute query
-		stm.execute(query);
+		int noOfRowsAffected = pstm.executeUpdate();
 		// close db connection
 		conn.close();
+
+		return noOfRowsAffected;
 	}
 
 	// delete product
@@ -77,7 +89,7 @@ public class ProductDAO {
 		// get db connection
 		Connection conn = new InItConn().getConnection();
 
-		String query = "delete from " + tableName + " where id="+ productId;
+		String query = "delete from " + tableName + " where id=" + productId;
 		// create statement
 		Statement stm = conn.createStatement();
 		// execute query
@@ -86,5 +98,24 @@ public class ProductDAO {
 		conn.close();
 	}
 
-	
+	public static List<ResultSet> getAllProductsAndCount() throws SQLException {
+
+		List<ResultSet> list = new ArrayList<>();
+		
+		// get db connection
+		Connection conn = new InItConn().getConnection();
+		
+		// create callable statement
+		CallableStatement cstm = conn.prepareCall("{ call get_all_products_and_count() }");
+		
+		ResultSet rst1 = cstm.executeQuery();
+		list.add(rst1);
+		
+		cstm.getMoreResults();
+		ResultSet rst2 = cstm.getResultSet();
+		list.add(rst2);
+		
+		return list;		
+	}
+
 }
